@@ -1,3 +1,5 @@
+import 'package:goodfood_ecosystem/core/widgets/language_toggle.dart';
+import 'package:goodfood_ecosystem/core/localization/goodfood_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,7 +28,7 @@ class RoleView extends StatelessWidget {
               content: Row(
                 mainAxisAlignment: .spaceBetween,
                 children: [
-                  Text(
+                  AppText(
                     "You now selected as ${state.role}",
                     style: AppFonts.subTitle,
                   ),
@@ -54,7 +56,7 @@ class RoleView extends StatelessWidget {
               content: Row(
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(right: 16.0),
+                    padding: const EdgeInsetsDirectional.only(end: 16.0),
                     child: Container(
                       width: 40,
                       height: 40,
@@ -69,7 +71,7 @@ class RoleView extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Text(state.msg, style: AppFonts.subTitle),
+                  AppText(state.msg, style: AppFonts.subTitle),
                 ],
               ),
               backgroundColor: AppColors.errorBackground,
@@ -83,9 +85,16 @@ class RoleView extends StatelessWidget {
             ),
           );
         }
-        
       },
       child: Scaffold(
+        extendBodyBehindAppBar: true,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          actions: const [LanguageToggle()],
+        ),
+
         body: Container(
           width: double.infinity,
           height: double.infinity,
@@ -108,11 +117,11 @@ class RoleView extends StatelessWidget {
                       width: 130,
                       height: 90,
                     ),
-                    Text("GoodFood", style: AppFonts.mainTitle),
-                    Text("RESTAURANT", style: AppFonts.smallGoldTiltle),
+                    AppText("GoodFood", style: AppFonts.mainTitle),
+                    AppText("RESTAURANT", style: AppFonts.smallGoldTiltle),
                     Padding(
                       padding: const EdgeInsets.only(top: 32.0),
-                      child: Text(
+                      child: AppText(
                         "Select Device Type",
                         style: AppFonts.subTitle.copyWith(
                           fontSize: 30,
@@ -120,7 +129,7 @@ class RoleView extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
+                    AppText(
                       "Choose the type of device you are setting up",
                       style: AppFonts.subTitle.copyWith(fontSize: 16),
                     ),

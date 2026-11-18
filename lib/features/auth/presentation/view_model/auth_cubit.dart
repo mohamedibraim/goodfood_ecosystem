@@ -7,12 +7,20 @@ import 'package:goodfood_ecosystem/features/auth/presentation/view_model/auth_er
 import 'package:goodfood_ecosystem/features/auth/presentation/view_model/auth_error_mapper.dart';
 import 'package:goodfood_ecosystem/features/auth/presentation/view_model/auth_state.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/firebase/firebase_environment.dart';
 
 class AuthCubit extends Cubit<AuthState> {
-  AuthCubit() : super(AuthIntialState());
-  UserModel? currentUser; 
-  final authInstance = FirebaseAuth.instance;
-  final storeInstance = FirebaseFirestore.instance;
+  AuthCubit({
+    FirebaseAuth? auth,
+    FirebaseFirestore? store,
+    this.secureCustomerFlow = FirebaseEnvironment.useEmulators,
+  }) : authInstance = auth ?? FirebaseEnvironment.auth,
+       storeInstance = store ?? FirebaseEnvironment.store,
+       super(AuthIntialState());
+  final bool secureCustomerFlow;
+  UserModel? currentUser;
+  final FirebaseAuth authInstance;
+  final FirebaseFirestore storeInstance;
   Future<void> login(String email, String pass) async {
     emit(AuthLoginLoadingState());
     try {
@@ -53,73 +61,76 @@ class AuthCubit extends Cubit<AuthState> {
       emit(AuthSelectRoleFailState(msg: e.toString()));
     }
   }
+
   Future<void> navigateNext() async {
-  emit(AuthSplashLoadingState());
+    emit(AuthSplashLoadingState());
 
-  final startTime = DateTime.now();
+    final startTime = DateTime.now();
 
-  try {
-    final sp = await SharedPreferences.getInstance();
-    final role = sp.getString("role");
+    try {
+      final sp = await SharedPreferences.getInstance();
+      final role = sp.getString("role");
 
-    String route;
+      String route;
 
-    if (role == null) {
-      route = '/role_selection';
-    } else {
-      final user = authInstance.currentUser;
-
-      if (user == null) {
-        route = role == "Stuff" ? '/login' : '/welcome';
+      if (role == null) {
+        route = '/role_selection';
       } else {
-        final userMap = await storeInstance
-            .collection("users")
-            .doc(user.uid)
-            .get();
+        final user = await authInstance.authStateChanges().first;
 
-        if (!userMap.exists || userMap.data() == null) {
-          await authInstance.signOut();
+        if (secureCustomerFlow &&
+            (role != 'Stuff' || user?.isAnonymous == true)) {
           currentUser = null;
+          route = role == 'Stuff' ? '/login' : '/welcome';
+        } else if (user == null) {
           route = role == "Stuff" ? '/login' : '/welcome';
         } else {
-          currentUser = UserModel.fromMap(userMap.data()!);
+          final userMap = await storeInstance
+              .collection("users")
+              .doc(user.uid)
+              .get();
 
-          if (role == "Stuff") {
-            route = currentUser!.role.name == "Admin"
-                ? '/admin'
-                : '/chef';
+          if (!userMap.exists || userMap.data() == null) {
+            await authInstance.signOut();
+            currentUser = null;
+            route = role == "Stuff" ? '/login' : '/welcome';
           } else {
-            route = '/welcome';
+            currentUser = UserModel.fromMap(userMap.data()!);
+
+            if (role == "Stuff") {
+              route = currentUser!.role.name == "Admin" ? '/admin' : '/chef';
+            } else {
+              route = '/welcome';
+            }
           }
         }
       }
+
+      const splashDuration = Duration(seconds: 2);
+      final elapsed = DateTime.now().difference(startTime);
+
+      if (elapsed < splashDuration) {
+        await Future.delayed(splashDuration - elapsed);
+      }
+
+      if (isClosed) return;
+
+      emit(AuthSplashSuccessState(route: route));
+    } catch (e) {
+      const splashDuration = Duration(seconds: 2);
+      final elapsed = DateTime.now().difference(startTime);
+
+      if (elapsed < splashDuration) {
+        await Future.delayed(splashDuration - elapsed);
+      }
+
+      if (isClosed) return;
+
+      emit(
+        AuthSplashFailState(
+          msg: "Unable to initialize the app. Please try again.",
+        ),
+      );
     }
-
-    const splashDuration = Duration(seconds: 2);
-    final elapsed = DateTime.now().difference(startTime);
-
-    if (elapsed < splashDuration) {
-      await Future.delayed(splashDuration - elapsed);
-    }
-
-    if (isClosed) return;
-
-    emit(AuthSplashSuccessState(route: route));
-  } catch (e) {
-    const splashDuration = Duration(seconds: 2);
-    final elapsed = DateTime.now().difference(startTime);
-
-    if (elapsed < splashDuration) {
-      await Future.delayed(splashDuration - elapsed);
-    }
-
-    if (isClosed) return;
-
-    emit(
-      AuthSplashFailState(
-        msg: "Unable to initialize the app. Please try again.",
-      ),
-    );
   }
-}
 }

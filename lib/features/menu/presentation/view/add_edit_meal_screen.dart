@@ -1,3 +1,5 @@
+import 'package:goodfood_ecosystem/core/widgets/language_toggle.dart';
+import 'package:goodfood_ecosystem/core/localization/goodfood_localizations.dart';
 import 'dart:async';
 
 import 'package:camera/camera.dart';
@@ -117,12 +119,13 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
     return Scaffold(
       backgroundColor: MenuPalette.bg,
       appBar: AppBar(
+        actions: const [LanguageToggle()],
         backgroundColor: MenuPalette.bg,
         foregroundColor: Colors.white,
         title: FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.centerLeft,
-          child: Text(_isEditing ? 'Edit Meal' : 'Add New Meal'),
+          child: AppText(_isEditing ? 'Edit Meal' : 'Add New Meal'),
         ),
       ),
       body: SafeArea(
@@ -157,7 +160,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                         minimumHeight: 46,
                         child: const FittedBox(
                           fit: BoxFit.scaleDown,
-                          child: Text('View saved products'),
+                          child: AppText('View saved products'),
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -180,10 +183,14 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                         validator: (value) {
                           final name = value?.trim() ?? '';
                           if (name.length < _minMealNameLength) {
-                            return 'Meal name must be at least 3 characters.';
+                            return context.tr(
+                              'Meal name must be at least 3 characters.',
+                            );
                           }
                           if (name.length > _maxMealNameLength) {
-                            return 'Meal name must be 60 characters or fewer.';
+                            return context.tr(
+                              'Meal name must be 60 characters or fewer.',
+                            );
                           }
                           return null;
                         },
@@ -201,7 +208,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                             .map(
                               (category) => DropdownMenuItem(
                                 value: category,
-                                child: Text(
+                                child: AppText(
                                   category.label,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -236,7 +243,9 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                         ),
                         validator: (value) {
                           if ((value?.length ?? 0) > _maxDescriptionLength) {
-                            return 'Description must be 500 characters or fewer.';
+                            return context.tr(
+                              'Description must be 500 characters or fewer.',
+                            );
                           }
                           return null;
                         },
@@ -264,11 +273,13 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                             text.startsWith('.') ? '0$text' : text,
                           );
                           if (price == null || !price.isFinite || price < 0) {
-                            return 'Enter a valid price.';
+                            return context.tr('Enter a valid price.');
                           }
                           if (price > _maxPrice ||
                               !_pricePattern.hasMatch(text)) {
-                            return 'Price must be at most 99,999.99.';
+                            return context.tr(
+                              'Price must be at most 99,999.99.',
+                            );
                           }
                           return null;
                         },
@@ -289,7 +300,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                               minimumHeight: 48,
                               child: const FittedBox(
                                 fit: BoxFit.scaleDown,
-                                child: Text('Cancel'),
+                                child: AppText('Cancel'),
                               ),
                             ),
                             AppButton(
@@ -302,7 +313,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                               isLoading: _isSaving,
                               child: FittedBox(
                                 fit: BoxFit.scaleDown,
-                                child: Text(
+                                child: AppText(
                                   _isEditing ? 'Save Changes' : 'Save Meal',
                                 ),
                               ),
@@ -379,7 +390,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                         ? null
                         : const Icon(Icons.link, color: MenuPalette.muted),
                     suffixIcon: IconButton(
-                      tooltip: 'Clear image URL',
+                      tooltip: context.tr('Clear image URL'),
                       onPressed: () => setState(_imageUrlController.clear),
                       icon: const Icon(Icons.close, color: MenuPalette.muted),
                     ),
@@ -397,10 +408,10 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
               borderColor: MenuPalette.goldDark,
               minimumHeight: compact ? 32 : 44,
               isLoading: _isUploadingImage,
-              tooltip: compact ? 'Choose image' : null,
+              tooltip: compact ? context.tr('Choose image') : null,
               child: compact
                   ? const SizedBox.shrink()
-                  : Text(
+                  : AppText(
                       _isUploadingImage
                           ? 'Saving image locally...'
                           : 'Choose image',
@@ -416,7 +427,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                   height: compact ? 64 : 104,
                   child: localImagePath == null && imageUrl.isEmpty
                       ? const Center(
-                          child: Text(
+                          child: AppText(
                             'Image preview will appear here',
                             style: TextStyle(color: MenuPalette.muted),
                           ),
@@ -440,14 +451,16 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
     final text = value?.trim() ?? '';
     if (text.isEmpty) return null;
     if (text.length > _maxImageUrlLength) {
-      return 'Image URL must be 2,048 characters or fewer.';
+      return context.tr('Image URL must be 2,048 characters or fewer.');
     }
     final uri = Uri.tryParse(text);
     if (uri == null ||
         !uri.hasAuthority ||
         uri.host.isEmpty ||
         (uri.scheme != 'http' && uri.scheme != 'https')) {
-      return 'Enter a valid image URL starting with http:// or https://.';
+      return context.tr(
+        'Enter a valid image URL starting with http:// or https://.',
+      );
     }
     return null;
   }
@@ -466,7 +479,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                   Icons.camera_alt_outlined,
                   color: MenuPalette.gold,
                 ),
-                title: const Text(
+                title: const AppText(
                   'Take a photo',
                   style: TextStyle(color: Colors.white),
                 ),
@@ -477,7 +490,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
                 Icons.photo_library_outlined,
                 color: MenuPalette.gold,
               ),
-              title: const Text(
+              title: const AppText(
                 'Choose from device',
                 style: TextStyle(color: Colors.white),
               ),
@@ -644,7 +657,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
               ),
               const SizedBox(width: 7),
               Expanded(
-                child: Text(
+                child: AppText(
                   label,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -659,8 +672,8 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
   }
 
   Widget _fieldLabel(String text) => Padding(
-    padding: const EdgeInsets.only(left: 2, bottom: 5),
-    child: Text(
+    padding: const EdgeInsetsDirectional.only(start: 2, bottom: 5),
+    child: AppText(
       text,
       style: const TextStyle(color: Colors.white, fontSize: 14),
     ),
@@ -670,7 +683,7 @@ class _AddEditMealScreenState extends State<AddEditMealScreen> {
 
   InputDecoration _decoration({String? hint, bool compact = false}) =>
       InputDecoration(
-        hintText: hint,
+        hintText: hint == null ? null : context.tr(hint),
         hintStyle: const TextStyle(color: MenuPalette.muted),
         filled: true,
         fillColor: MenuPalette.surface,
@@ -968,9 +981,10 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+        actions: const [LanguageToggle()],
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('Take a photo'),
+        title: const AppText('Take a photo'),
       ),
       body: SafeArea(
         child: LayoutBuilder(
@@ -992,7 +1006,7 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Text(
+                                AppText(
                                   _cameraPermissionDenied
                                       ? 'Camera permission is disabled. Allow camera access for desktop apps in Windows settings.'
                                       : 'Camera unavailable:\n$_errorMessage',
@@ -1008,10 +1022,8 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
                                     onPressed: _isOpeningSettings
                                         ? null
                                         : _openCameraSettings,
-                                    icon: const Icon(
-                                      Icons.settings_outlined,
-                                    ),
-                                    label: const Text(
+                                    icon: const Icon(Icons.settings_outlined),
+                                    label: const AppText(
                                       'Open camera privacy settings',
                                       textAlign: TextAlign.center,
                                     ),
@@ -1022,30 +1034,29 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
                                         ? null
                                         : _initializeCamera,
                                     icon: const Icon(Icons.refresh),
-                                    label: const Text('Retry Camera'),
+                                    label: const AppText('Retry Camera'),
                                   ),
                               ],
                             ),
                           )
                         : isReady && controller != null
-                            ? LayoutBuilder(
-                                builder: (context, previewConstraints) {
-                                  return Center(
-                                    child: ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: previewConstraints.maxWidth,
-                                        maxHeight: previewConstraints.maxHeight,
-                                      ),
-                                      child: AspectRatio(
-                                        aspectRatio:
-                                            controller.value.aspectRatio,
-                                        child: CameraPreview(controller),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              )
-                            : const CircularProgressIndicator(),
+                        ? LayoutBuilder(
+                            builder: (context, previewConstraints) {
+                              return Center(
+                                child: ConstrainedBox(
+                                  constraints: BoxConstraints(
+                                    maxWidth: previewConstraints.maxWidth,
+                                    maxHeight: previewConstraints.maxHeight,
+                                  ),
+                                  child: AspectRatio(
+                                    aspectRatio: controller.value.aspectRatio,
+                                    child: CameraPreview(controller),
+                                  ),
+                                ),
+                              );
+                            },
+                          )
+                        : const CircularProgressIndicator(),
                   ),
                 ),
 
@@ -1063,10 +1074,8 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
                               onPressed: _isTakingPhoto
                                   ? null
                                   : _chooseFromDevice,
-                              icon: const Icon(
-                                Icons.photo_library_outlined,
-                              ),
-                              label: const Text(
+                              icon: const Icon(Icons.photo_library_outlined),
+                              label: const AppText(
                                 'Choose from device',
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
@@ -1089,7 +1098,7 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
                                       )
                                     : const Icon(Icons.camera_alt),
                                 iconSize: 26,
-                                tooltip: 'Take photo',
+                                tooltip: context.tr('Take photo'),
                               ),
                             ),
                           ],
@@ -1101,10 +1110,8 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
                                 onPressed: _isTakingPhoto
                                     ? null
                                     : _chooseFromDevice,
-                                icon: const Icon(
-                                  Icons.photo_library_outlined,
-                                ),
-                                label: const Text(
+                                icon: const Icon(Icons.photo_library_outlined),
+                                label: const AppText(
                                   'Choose from device',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -1127,7 +1134,7 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
                                     )
                                   : const Icon(Icons.camera_alt),
                               iconSize: 26,
-                              tooltip: 'Take photo',
+                              tooltip: context.tr('Take photo'),
                             ),
                           ],
                         ),
@@ -1139,5 +1146,4 @@ class _WindowsCameraScreenState extends State<_WindowsCameraScreen> {
       ),
     );
   }
-
 }

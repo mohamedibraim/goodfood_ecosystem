@@ -1,3 +1,5 @@
+import 'package:goodfood_ecosystem/core/widgets/language_toggle.dart';
+import 'package:goodfood_ecosystem/core/localization/goodfood_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -60,20 +62,21 @@ class _MenuManagementView extends StatelessWidget {
             appBar: AppBar(
               backgroundColor: MenuPalette.bg,
               foregroundColor: Colors.white,
-              title: Text(
+              title: AppText(
                 veryNarrow ? 'Products' : 'Customer Menu Products',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
               actions: [
+                const LanguageToggle(),
                 if (!compact)
                   Padding(
-                    padding: const EdgeInsets.only(right: 12),
+                    padding: const EdgeInsetsDirectional.only(end: 12),
                     child: _addProductButton(context),
                   )
                 else if (veryNarrow)
                   IconButton(
-                    tooltip: 'Add product',
+                    tooltip: context.tr('Add product'),
                     onPressed: () => _openEditor(context),
                     icon: const Icon(Icons.add),
                   ),
@@ -123,9 +126,9 @@ class _MenuManagementView extends StatelessWidget {
                           onChanged: context.read<MenuManagementCubit>().search,
                           style: const TextStyle(color: Colors.white),
                           decoration: InputDecoration(
-                            hintText: veryNarrow
-                                ? 'Search...'
-                                : 'Search products...',
+                            hintText: context.tr(
+                              veryNarrow ? 'Search...' : 'Search products...',
+                            ),
                             hintStyle: const TextStyle(
                               color: MenuPalette.muted,
                             ),
@@ -196,7 +199,9 @@ class _MenuManagementView extends StatelessWidget {
                                       state.category != null
                                   ? 'No products match these filters.'
                                   : 'No products yet. Connect to Firebase to refresh, or add a product below.',
-                              actionLabel: state.meals.isEmpty ? 'Refresh' : null,
+                              actionLabel: state.meals.isEmpty
+                                  ? 'Refresh'
+                                  : null,
                               onAction: state.meals.isEmpty
                                   ? context.read<MenuManagementCubit>().watch
                                   : null,
@@ -216,10 +221,8 @@ class _MenuManagementView extends StatelessWidget {
                                   itemCount: state.visible.length,
                                   separatorBuilder: (_, _) =>
                                       const SizedBox(height: 8),
-                                  itemBuilder: (context, index) => _mealTile(
-                                    context,
-                                    state.visible[index],
-                                  ),
+                                  itemBuilder: (context, index) =>
+                                      _mealTile(context, state.visible[index]),
                                 ),
                               ),
                             ),
@@ -240,7 +243,7 @@ class _MenuManagementView extends StatelessWidget {
     foregroundColor: Colors.black,
     backgroundColor: MenuPalette.gold,
     minimumHeight: 44,
-    child: const Text(
+    child: const AppText(
       'Add product',
       style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
     ),
@@ -273,22 +276,22 @@ class _MenuManagementView extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         backgroundColor: MenuPalette.surface,
-        title: const Text(
+        title: const AppText(
           'Delete meal?',
           style: TextStyle(color: Colors.white),
         ),
-        content: Text(
+        content: AppText(
           'This will permanently remove ${meal.name}.',
           style: const TextStyle(color: MenuPalette.muted),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text(
+            child: const AppText(
               'Delete',
               style: TextStyle(color: Colors.redAccent),
             ),
@@ -319,7 +322,7 @@ class _VisibilityFilters extends StatelessWidget {
       for (final (filter, label) in filters)
         ChoiceChip(
           key: ValueKey('visibility-filter-${filter.name}'),
-          label: Text(label),
+          label: AppText(label),
           selected: selected == filter,
           onSelected: (_) => onSelected(filter),
           showCheckmark: false,

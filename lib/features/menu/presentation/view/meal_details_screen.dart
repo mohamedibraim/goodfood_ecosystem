@@ -1,3 +1,5 @@
+import 'package:goodfood_ecosystem/core/widgets/language_toggle.dart';
+import 'package:goodfood_ecosystem/core/localization/goodfood_localizations.dart';
 import 'package:flutter/material.dart';
 
 import '../../data/models/meal_model.dart';
@@ -15,9 +17,10 @@ class MealDetailsScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: MenuPalette.bg,
       appBar: AppBar(
+        actions: const [LanguageToggle()],
         backgroundColor: MenuPalette.bg,
         foregroundColor: Colors.white,
-        title: const Text(
+        title: const AppText(
           'Meal Details',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -40,7 +43,7 @@ class MealDetailsScreen extends StatelessWidget {
               ),
             ),
           );
-          final details = _mealInformation();
+          final details = _mealInformation(context);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
@@ -73,7 +76,7 @@ class MealDetailsScreen extends StatelessWidget {
                                 Icons.add_shopping_cart,
                                 color: Colors.black,
                               ),
-                              label: const Text(
+                              label: const AppText(
                                 'Add to Cart',
                                 style: TextStyle(
                                   color: Colors.black,
@@ -103,7 +106,7 @@ class MealDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _mealInformation() => Column(
+  Widget _mealInformation(BuildContext context) => Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
       Text(
@@ -115,7 +118,7 @@ class MealDetailsScreen extends StatelessWidget {
         ),
       ),
       const SizedBox(height: 12),
-      Text(
+      AppText(
         '\$${meal.price.toStringAsFixed(2)}',
         style: const TextStyle(
           color: MenuPalette.gold,
@@ -131,13 +134,13 @@ class MealDetailsScreen extends StatelessWidget {
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: MenuPalette.border),
         ),
-        child: Text(
+        child: AppText(
           meal.category.label,
           style: const TextStyle(color: MenuPalette.muted),
         ),
       ),
       const SizedBox(height: 22),
-      const Text(
+      const AppText(
         'Description',
         style: TextStyle(
           color: Colors.white,
@@ -148,7 +151,7 @@ class MealDetailsScreen extends StatelessWidget {
       const SizedBox(height: 8),
       Text(
         meal.description.isEmpty
-            ? 'No description available.'
+            ? context.tr('No description available.')
             : meal.description,
         style: const TextStyle(
           color: MenuPalette.muted,
